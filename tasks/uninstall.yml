@@ -32,11 +32,6 @@
         - env
         - labels
 
-    - name: Ensure LimeSurvey image source files path does not exist
-      ansible.builtin.file:
-        path: "{{ limesurvey_container_image_self_build_src_files_path }}"
-        state: absent
-
     - name: Ensure LimeSurvey local path for customization files does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ limesurvey_customization_path }}"

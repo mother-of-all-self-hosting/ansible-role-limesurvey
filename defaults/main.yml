@@ -39,13 +39,7 @@ limesurvey_container_image_registry_prefix: "{{ limesurvey_container_image_regis
 limesurvey_container_image_registry_prefix_upstream: "{{ limesurvey_container_image_registry_prefix_upstream_default }}"
 limesurvey_container_image_registry_prefix_upstream_default: docker.io/
 limesurvey_container_image_force_pull: "{{ limesurvey_container_image.endswith(':latest') }}"
-
-limesurvey_container_image_self_build: false
-limesurvey_container_image_self_build_name: "martialblog/docker-limesurvey:{{ limesurvey_container_image_self_build_repo_version }}"
-limesurvey_container_image_self_build_repo: "https://github.com/martialblog/docker-limesurvey.git"
-limesurvey_container_image_self_build_repo_version: "{{ limesurvey_version if limesurvey_version != 'latest' else 'master' }}"
-limesurvey_container_image_self_build_src_files_path: "{{ limesurvey_base_path }}/docker-src"
-limesurvey_container_image_self_build_repo_dockerfile_dir: "{{ limesurvey_container_image_self_build_src_files_path }}/martialblog/limesurvey/{{ limesurvey_version.split('.')[0] }}.0"
+# TODO: add tasks to self-build the image
 
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #

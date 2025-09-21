@@ -27,53 +27,27 @@
     - env
     - labels
 
-- name: Run if self-building of LimeSurvey container image is not enabled
-  when: "not limesurvey_container_image_self_build | bool"
-  block:
-    - name: Ensure LimeSurvey container image is pulled via community.docker.docker_image
-      when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
-      community.docker.docker_image:
-        name: "{{ limesurvey_container_image }}"
-        source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
-        force_source: "{{ limesurvey_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
-        force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else limesurvey_container_image_force_pull }}"
-      register: result
-      retries: "{{ devture_playbook_help_container_retries_count }}"
-      delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
+- name: Ensure LimeSurvey container image is pulled via community.docker.docker_image
+  when: devture_systemd_docker_base_container_image_pull_method == 'ansible-module'
+  community.docker.docker_image:
+    name: "{{ limesurvey_container_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ limesurvey_container_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else limesurvey_container_image_force_pull }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
 
-    - name: Ensure LimeSurvey container image is pulled via ansible.builtin.command
-      when: devture_systemd_docker_base_container_image_pull_method == 'command'
-      ansible.builtin.command:
-        cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ limesurvey_container_image }}"
-      register: result
-      retries: "{{ devture_playbook_help_container_retries_count }}"
-      delay: "{{ devture_playbook_help_container_retries_delay }}"
-      until: result is not failed
-      changed_when: "'Downloaded newer image' in result.stdout"
-
-- name: Run if self-building of LimeSurvey container image is enabled
-  when: "limesurvey_container_image_self_build | bool"
-  block:
-    - name: Ensure LimeSurvey repository is present on self-build
-      ansible.builtin.git:
-        repo: "{{ limesurvey_container_image_self_build_repo }}"
-        version: "{{ limesurvey_container_image_self_build_repo_version }}"
-        dest: "{{ limesurvey_container_image_self_build_src_files_path }}"
-        force: "yes"
-      register: limesurvey_git_pull_results
-
-    - name: Ensure LimeSurvey container image is built
-      community.docker.docker_image:
-        name: "{{ limesurvey_container_image_self_build_name }}"
-        source: build
-        force_source: "{{ limesurvey_git_pull_results.changed if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
-        force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else limesurvey_git_pull_results.changed }}"
-        build:
-          dockerfile: Dockerfile
-          path: "{{ limesurvey_container_image_self_build_repo_dockerfile_dir }}"
-          pull: true
-          args:
+- name: Ensure LimeSurvey container image is pulled via ansible.builtin.command
+  when: devture_systemd_docker_base_container_image_pull_method == 'command'
+  ansible.builtin.command:
+    cmd: "{{ devture_systemd_docker_base_host_command_docker }} pull {{ limesurvey_container_image }}"
+  register: result
+  retries: "{{ devture_playbook_help_container_retries_count }}"
+  delay: "{{ devture_playbook_help_container_retries_delay }}"
+  until: result is not failed
+  changed_when: "'Downloaded newer image' in result.stdout"
 
 - name: Ensure LimeSurvey container network is created via community.docker.docker_network
   when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
