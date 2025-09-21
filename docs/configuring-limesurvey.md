@@ -29,9 +29,9 @@ See the project's [documentation](https://hub.docker.com/r/acspri/limesurvey) to
 
 ## Prerequisites
 
-To run a LimeSurvey instance it is necessary to prepare a database. You can use a [SQLite](https://www.sqlite.org/), [Postgres](https://www.postgresql.org/), or [MySQL](https://www.mysql.com/) compatible database server. By default it is configured to use SQLite.
+To run a LimeSurvey instance it is necessary to prepare a [MySQL](https://www.mysql.com/) compatible database server.
 
-If you are looking for Ansible roles for a Postgres or MySQL compatible server, you can check out [ansible-role-postgres](https://github.com/mother-of-all-self-hosting/ansible-role-postgres) and [ansible-role-mariadb](https://github.com/mother-of-all-self-hosting/ansible-role-mariadb), both of which are maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
+If you are looking for an Ansible role for [MariaDB](https://mariadb.org/), you can check out [this role (ansible-role-mariadb)](https://github.com/mother-of-all-self-hosting/ansible-role-mariadb) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team.
 
 ## Adjusting the playbook configuration
 
@@ -67,22 +67,16 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting LimeSurvey under a subpath (by configuring the `limesurvey_path_prefix` variable) does not seem to be possible due to LimeSurvey's technical limitations.
 
-### Specify database (optional)
+### Set variables for connecting to a Postgres database server
 
-You can specify a database used by LimeSurvey. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `limesurvey_plugin_path`.
-
-To use `pg` (node-postgres), a PostgreSQL client for Node.js, add the following configuration to your `vars.yml` file:
+To have the Limesurvey instance connect to your Postgres server, add the following configuration to your `vars.yml` file.
 
 ```yaml
-limesurvey_database_type: pg
+limesurvey_database_hostname: YOUR_POSTGRES_SERVER_HOSTNAME_HERE
+limesurvey_database_username: YOUR_POSTGRES_SERVER_USERNAME_HERE
+limesurvey_database_password: YOUR_POSTGRES_SERVER_PASSWORD_HERE
+limesurvey_database_name: YOUR_POSTGRES_SERVER_DATABASE_NAME_HERE
 ```
-
-Set `mysql2` to use a MySQL compatible database via [MySQL2](https://sidorares.github.io/node-mysql2/docs), a MySQL client for Node.js.
-
->[!NOTE]
-> It is possible to use `pg-native` for Postgres and `sqlite3` for SQlite. As they are not installed by default, you'll need to install them with `npm` beforehand.
-
-For other settings, check variables such as `limesurvey_database_postgres_*` and `limesurvey_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
 
 ### Extending the configuration
 

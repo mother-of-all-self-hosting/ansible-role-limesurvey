@@ -175,28 +175,12 @@ limesurvey_systemd_wanted_services_list_default: []
 limesurvey_systemd_wanted_services_list_auto: []
 limesurvey_systemd_wanted_services_list_custom: []
 
-# Specify a database driver to use
-# Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
-# Note pg-native and sqlite3 are not installed by default.
-limesurvey_database_type: better-sqlite3
-
 # Specify database configuration
-limesurvey_database_filename: ''
-limesurvey_database_mysql_hostname: ''
-limesurvey_database_mysql_port: 3306
-limesurvey_database_mysql_username: limesurvey
-limesurvey_database_mysql_password: ''
-limesurvey_database_mysql_ssl: false
-limesurvey_database_postgres_hostname: ''
-limesurvey_database_postgres_port: 5432
-limesurvey_database_postgres_username: limesurvey
-limesurvey_database_postgres_password: ''
-
-# Use this to set the sslmode parameter of the SSL connection
-# By default, we expect a local container (without SSL), so attempting SSL connections is not necessary.
-limesurvey_database_postgres_ssl: false
-
+limesurvey_database_hostname: ""
+limesurvey_database_username: limesurvey
+limesurvey_database_password: ""
 limesurvey_database_name: limesurvey
+limesurvey_database_table_prefix: ""
 
 # Additional environment variables.
 limesurvey_environment_variables_additional_variables: ''

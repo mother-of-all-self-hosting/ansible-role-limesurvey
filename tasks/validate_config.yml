@@ -26,30 +26,8 @@
     - limesurvey_hostname
     - limesurvey_path_prefix
     - limesurvey_container_network
-
-- name: Fail if LimeSurvey database type is invalid
-  ansible.builtin.fail:
-    msg: >-
-      limesurvey_database_type must be 'better-sqlite3', 'sqlite3', 'mysql2', 'pg', or 'pg-native'. Since 'sqlite3' and 'pg-native' are not installed by default, you need to install them beforehand to use them.
-  when: "limesurvey_database_type not in ['better-sqlite3', 'sqlite3', 'mysql2', 'pg', 'pg-native']"
-
-- name: Fail if required LimeSurvey + MySQL2 integration settings not defined
-  ansible.builtin.fail:
-    msg: >-
-      You need to define a required configuration setting (`{{ item }}`) when `limesurvey_database_type` is `mysql2`
-  when: "limesurvey_database_type == 'mysql2' and lookup('vars', item, default='') | string | length == 0"
-  with_items:
-    - limesurvey_database_mysql_hostname
-    - limesurvey_database_mysql_password
-
-- name: Fail if required LimeSurvey + pg integration settings not defined
-  ansible.builtin.fail:
-    msg: >-
-      You need to define a required configuration setting (`{{ item }}`) when `limesurvey_database_type` is `pg`
-  when: "limesurvey_database_type == 'pg' and lookup('vars', item, default='') | string | length == 0"
-  with_items:
-    - limesurvey_database_postgres_hostname
-    - limesurvey_database_postgres_password
+    - limesurvey_database_hostname
+    - limesurvey_database_password
 
 - name: Run if Traefik is enabled
   when: limesurvey_container_labels_traefik_enabled | bool
