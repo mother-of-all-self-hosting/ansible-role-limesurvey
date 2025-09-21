@@ -39,11 +39,11 @@
       changed_when: limesurvey_config_path_deletion_result.rc == 0
       failed_when: false
 
-    - name: Ensure LimeSurvey local data path does not exist if empty
+    - name: Ensure LimeSurvey local path for plugin files does not exist if empty
       ansible.builtin.command:
-        cmd: "rmdir {{ limesurvey_data_path }}"
-      register: limesurvey_data_path_deletion_result
-      changed_when: limesurvey_data_path_deletion_result.rc == 0
+        cmd: "rmdir {{ limesurvey_plugin_path }}"
+      register: limesurvey_plugin_path_deletion_result
+      changed_when: limesurvey_plugin_path_deletion_result.rc == 0
       failed_when: false
 
     - name: Ensure LimeSurvey base path does not exist if empty
@@ -86,20 +86,20 @@
         ]
       }}
 
-- name: Check existence of LimeSurvey local data path
+- name: Check existence of LimeSurvey local path for plugin files
   ansible.builtin.stat:
-    path: "{{ limesurvey_data_path }}"
-  register: limesurvey_data_path_stat
+    path: "{{ limesurvey_plugin_path }}"
+  register: limesurvey_plugin_path_stat
 
 # We just want to notify the user. Deleting data is too destructive.
-- name: Notify if LimeSurvey local data remains
-  when: limesurvey_data_path_stat.stat.exists | bool
+- name: Notify if LimeSurvey local plugin files remain
+  when: limesurvey_plugin_path_stat.stat.exists | bool
   ansible.builtin.set_fact:
     devture_playbook_runtime_messages_list: |
       {{
         devture_playbook_runtime_messages_list | default([])
         +
         [
-          "Note: As the local LimeSurvey instance has been removed, some old data remains in `" + limesurvey_data_path + "`. Feel free to delete it."
+          "Note: As the local LimeSurvey instance has been removed, some old data remains in `" + limesurvey_plugin_path + "`. Feel free to delete it."
         ]
       }}

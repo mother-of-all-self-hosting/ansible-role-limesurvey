@@ -14,7 +14,7 @@
   with_items:
     - "{{ limesurvey_base_path }}"
     - "{{ limesurvey_config_path }}"
-    - "{{ limesurvey_data_path }}"
+    - "{{ limesurvey_plugin_path }}"
 
 - name: Ensure LimeSurvey support files installed
   ansible.builtin.template:

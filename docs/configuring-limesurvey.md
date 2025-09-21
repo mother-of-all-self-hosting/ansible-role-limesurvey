@@ -69,7 +69,7 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 ### Specify database (optional)
 
-You can specify a database used by LimeSurvey. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `limesurvey_data_path`.
+You can specify a database used by LimeSurvey. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `limesurvey_plugin_path`.
 
 To use `pg` (node-postgres), a PostgreSQL client for Node.js, add the following configuration to your `vars.yml` file:
 
