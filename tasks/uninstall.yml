@@ -46,6 +46,13 @@
       changed_when: limesurvey_plugin_path_deletion_result.rc == 0
       failed_when: false
 
+    - name: Ensure LimeSurvey local path for uploaded files does not exist if empty
+      ansible.builtin.command:
+        cmd: "rmdir {{ limesurvey_upload_path }}"
+      register: limesurvey_upload_path_deletion_result
+      changed_when: limesurvey_upload_path_deletion_result.rc == 0
+      failed_when: false
+
     - name: Ensure LimeSurvey base path does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ limesurvey_base_path }}"
@@ -101,5 +108,23 @@
         +
         [
           "Note: As the local LimeSurvey instance has been removed, some old data remains in `" + limesurvey_plugin_path + "`. Feel free to delete it."
+        ]
+      }}
+
+- name: Check existence of LimeSurvey local path for uploaded files
+  ansible.builtin.stat:
+    path: "{{ limesurvey_upload_path }}"
+  register: limesurvey_upload_path_stat
+
+# We just want to notify the user. Deleting data is too destructive.
+- name: Notify if LimeSurvey local upload files remain
+  when: limesurvey_upload_path_stat.stat.exists | bool
+  ansible.builtin.set_fact:
+    devture_playbook_runtime_messages_list: |
+      {{
+        devture_playbook_runtime_messages_list | default([])
+        +
+        [
+          "Note: As the local LimeSurvey instance has been removed, some old data remains in `" + limesurvey_upload_path + "`. Feel free to delete it."
         ]
       }}
