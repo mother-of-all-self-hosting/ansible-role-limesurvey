@@ -4,24 +4,24 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Perform Kutt installation tasks
-  when: kutt_enabled | bool
+- name: Perform LimeSurvey installation tasks
+  when: limesurvey_enabled | bool
   tags:
     - setup-all
-    - setup-kutt
+    - setup-limesurvey
     - install-all
-    - install-kutt
+    - install-limesurvey
   block:
-    - name: Validate Kutt configuration
+    - name: Validate LimeSurvey configuration
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
-    - name: Install Kutt
+    - name: Install LimeSurvey
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
-- name: Perform Kutt uninstallation tasks
-  when: not kutt_enabled | bool
+- name: Perform LimeSurvey uninstallation tasks
+  when: not limesurvey_enabled | bool
   tags:
     - setup-all
-    - setup-kutt
+    - setup-limesurvey
   block:
-    - name: Uninstall Kutt
+    - name: Uninstall LimeSurvey
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"

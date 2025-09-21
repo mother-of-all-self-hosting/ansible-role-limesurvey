@@ -5,55 +5,55 @@ SPDX-FileCopyrightText: 2025 Suguru Hirahara
 SPDX-License-Identifier: AGPL-3.0-or-later
 #}
 
-{% if kutt_container_labels_traefik_enabled %}
+{% if limesurvey_container_labels_traefik_enabled %}
 traefik.enable=true
 
-{% if kutt_container_labels_traefik_docker_network %}
-traefik.docker.network={{ kutt_container_labels_traefik_docker_network }}
+{% if limesurvey_container_labels_traefik_docker_network %}
+traefik.docker.network={{ limesurvey_container_labels_traefik_docker_network }}
 {% endif %}
 
 {% set middlewares = [] %}
 
-{% if kutt_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ kutt_identifier }}-slashless-redirect.redirectregex.regex=^({{ kutt_container_labels_traefik_path_prefix | quote }})$
-traefik.http.middlewares.{{ kutt_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
-{% set middlewares = middlewares + [kutt_identifier + '-slashless-redirect'] %}
+{% if limesurvey_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ limesurvey_identifier }}-slashless-redirect.redirectregex.regex=^({{ limesurvey_container_labels_traefik_path_prefix | quote }})$
+traefik.http.middlewares.{{ limesurvey_identifier }}-slashless-redirect.redirectregex.replacement=${1}/
+{% set middlewares = middlewares + [limesurvey_identifier + '-slashless-redirect'] %}
 {% endif %}
 
-{% if kutt_container_labels_traefik_path_prefix != '/' %}
-traefik.http.middlewares.{{ kutt_identifier }}-strip-prefix.stripprefix.prefixes={{ kutt_container_labels_traefik_path_prefix }}
-{% set middlewares = middlewares + [kutt_identifier + '-strip-prefix'] %}
+{% if limesurvey_container_labels_traefik_path_prefix != '/' %}
+traefik.http.middlewares.{{ limesurvey_identifier }}-strip-prefix.stripprefix.prefixes={{ limesurvey_container_labels_traefik_path_prefix }}
+{% set middlewares = middlewares + [limesurvey_identifier + '-strip-prefix'] %}
 {% endif %}
 
-{% if kutt_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
-{% for name, value in kutt_container_labels_traefik_additional_request_headers.items() %}
-traefik.http.middlewares.{{ kutt_identifier }}-add-request-headers.headers.customrequestheaders.{{ name }}={{ value }}
+{% if limesurvey_container_labels_traefik_additional_request_headers.keys() | length > 0 %}
+{% for name, value in limesurvey_container_labels_traefik_additional_request_headers.items() %}
+traefik.http.middlewares.{{ limesurvey_identifier }}-add-request-headers.headers.customrequestheaders.{{ name }}={{ value }}
 {% endfor %}
-{% set middlewares = middlewares + [kutt_identifier + '-add-request-headers'] %}
+{% set middlewares = middlewares + [limesurvey_identifier + '-add-request-headers'] %}
 {% endif %}
 
-{% if kutt_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
-{% for name, value in kutt_container_labels_traefik_additional_response_headers.items() %}
-traefik.http.middlewares.{{ kutt_identifier }}-add-response-headers.headers.customresponseheaders.{{ name }}={{ value }}
+{% if limesurvey_container_labels_traefik_additional_response_headers.keys() | length > 0 %}
+{% for name, value in limesurvey_container_labels_traefik_additional_response_headers.items() %}
+traefik.http.middlewares.{{ limesurvey_identifier }}-add-response-headers.headers.customresponseheaders.{{ name }}={{ value }}
 {% endfor %}
-{% set middlewares = middlewares + [kutt_identifier + '-add-response-headers'] %}
+{% set middlewares = middlewares + [limesurvey_identifier + '-add-response-headers'] %}
 {% endif %}
 
-traefik.http.routers.{{ kutt_identifier }}.rule={{ kutt_container_labels_traefik_rule }}
-{% if kutt_container_labels_traefik_priority | int > 0 %}
-traefik.http.routers.{{ kutt_identifier }}.priority={{ kutt_container_labels_traefik_priority }}
+traefik.http.routers.{{ limesurvey_identifier }}.rule={{ limesurvey_container_labels_traefik_rule }}
+{% if limesurvey_container_labels_traefik_priority | int > 0 %}
+traefik.http.routers.{{ limesurvey_identifier }}.priority={{ limesurvey_container_labels_traefik_priority }}
 {% endif %}
-traefik.http.routers.{{ kutt_identifier }}.service={{ kutt_identifier }}
+traefik.http.routers.{{ limesurvey_identifier }}.service={{ limesurvey_identifier }}
 {% if middlewares | length > 0 %}
-traefik.http.routers.{{ kutt_identifier }}.middlewares={{ middlewares | join(',') }}
+traefik.http.routers.{{ limesurvey_identifier }}.middlewares={{ middlewares | join(',') }}
 {% endif %}
-traefik.http.routers.{{ kutt_identifier }}.entrypoints={{ kutt_container_labels_traefik_entrypoints }}
-traefik.http.routers.{{ kutt_identifier }}.tls={{ kutt_container_labels_traefik_tls | to_json }}
-{% if kutt_container_labels_traefik_tls %}
-traefik.http.routers.{{ kutt_identifier }}.tls.certResolver={{ kutt_container_labels_traefik_tls_certResolver }}
-{% endif %}
-
-traefik.http.services.{{ kutt_identifier }}.loadbalancer.server.port={{ kutt_container_http_port }}
+traefik.http.routers.{{ limesurvey_identifier }}.entrypoints={{ limesurvey_container_labels_traefik_entrypoints }}
+traefik.http.routers.{{ limesurvey_identifier }}.tls={{ limesurvey_container_labels_traefik_tls | to_json }}
+{% if limesurvey_container_labels_traefik_tls %}
+traefik.http.routers.{{ limesurvey_identifier }}.tls.certResolver={{ limesurvey_container_labels_traefik_tls_certResolver }}
 {% endif %}
 
-{{ kutt_container_labels_additional_labels }}
+traefik.http.services.{{ limesurvey_identifier }}.loadbalancer.server.port={{ limesurvey_container_http_port }}
+{% endif %}
+
+{{ limesurvey_container_labels_additional_labels }}
