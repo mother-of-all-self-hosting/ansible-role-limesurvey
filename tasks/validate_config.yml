@@ -26,7 +26,6 @@
     - limesurvey_hostname
     - limesurvey_path_prefix
     - limesurvey_container_network
-    - limesurvey_environment_variables_jwt_secret
 
 - name: Fail if LimeSurvey database type is invalid
   ansible.builtin.fail:
@@ -51,15 +50,6 @@
   with_items:
     - limesurvey_database_postgres_hostname
     - limesurvey_database_postgres_password
-
-- name: Fail if SMTP settings are missing (and SMTP is enabled by setting host)
-  ansible.builtin.fail:
-    msg: >-
-      You need to define a required configuration setting (`{{ item }}`) to correctly set up email via SMTP.
-  when: "limesurvey_environment_variables_smtp_enabled | bool and lookup('vars', item, default='') | string | length == 0"
-  with_items:
-    - limesurvey_environment_variables_smtp_host
-    - limesurvey_environment_variables_smtp_from
 
 - name: Run if Traefik is enabled
   when: limesurvey_container_labels_traefik_enabled | bool

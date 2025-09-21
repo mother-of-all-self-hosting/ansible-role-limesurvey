@@ -18,11 +18,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Setting up LimeSurvey
 
-This is an [Ansible](https://www.ansible.com/) role which installs [LimeSurvey](https://limesurvey.it/) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
+This is an [Ansible](https://www.ansible.com/) role which installs [LimeSurvey](https://www.limesurvey.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
 LimeSurvey is a modern URL shortener with support for custom domains with functions like statistics and user management.
 
-See the project's [documentation](https://github.com/thedevs-network/limesurvey/blob/main/README.md) to learn what LimeSurvey does and why it might be useful to you.
+See the project's [documentation](https://hub.docker.com/r/acspri/limesurvey) to learn what LimeSurvey does and why it might be useful to you.
 
 >[!NOTE]
 > Since the developer team behind LimeSurvey [declared](https://bugs.limesurvey.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/limesurvey), which is a LimeSurvey Authorised Partner for Australia (see [this list](https://www.limesurvey.com/index.php/hosting) of partners for confirmation).
@@ -67,14 +67,6 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting LimeSurvey under a subpath (by configuring the `limesurvey_path_prefix` variable) does not seem to be possible due to LimeSurvey's technical limitations.
 
-### Set a random string for signing authentication tokens
-
-You also need to set a random string for signing authentication tokens. To do so, add the following configuration to your `vars.yml` file. The value can be generated with `pwgen -s 64 1` or in another way.
-
-```yaml
-limesurvey_environment_variables_jwt_secret: YOUR_SECRET_KEY_HERE
-```
-
 ### Specify database (optional)
 
 You can specify a database used by LimeSurvey. By default it is configured to use SQLite, and the SQLite database is stored in the directory specified with `limesurvey_data_path`.
@@ -92,62 +84,6 @@ Set `mysql2` to use a MySQL compatible database via [MySQL2](https://sidorares.g
 
 For other settings, check variables such as `limesurvey_database_postgres_*` and `limesurvey_database_mysql_*` on [`defaults/main.yml`](../defaults/main.yml).
 
-### Configure a Redis server for caching (optional)
-
-Also, you can optionally enable a [Redis](https://redis.io/) server for managing cache.
-
-If you are looking for an Ansible role for Redis, you can check out [ansible-role-redis](https://github.com/mother-of-all-self-hosting/ansible-role-redis) maintained by the [Mother-of-All-Self-Hosting (MASH)](https://github.com/mother-of-all-self-hosting) team. The roles for [KeyDB](https://keydb.dev/) ([ansible-role-keydb](https://github.com/mother-of-all-self-hosting/ansible-role-keydb)) and [Valkey](https://valkey.io/) ([ansible-role-valkey](https://github.com/mother-of-all-self-hosting/ansible-role-valkey)) are available as well.
-
-To enable Redis for LimeSurvey, add the following configuration to your `vars.yml` file, so that the LimeSurvey instance will connect to the server:
-
-```yaml
-limesurvey_redis_hostname: YOUR_REDIS_SERVER_HOSTNAME_HERE
-limesurvey_redis_port: 6379
-limesurvey_redis_password: YOUR_REDIS_SERVER_PASSWORD_HERE
-limesurvey_redis_database: 0
-```
-
-Make sure to replace `YOUR_REDIS_SERVER_HOSTNAME_HERE` and `YOUR_REDIS_SERVER_PASSWORD_HERE` with your own values.
-
-### Configure the mailer (optional)
-
-You can configure a SMTP mailer to enable it for signing up, verifying or changing email address, resetting password, and sending reports.
-
-To configure it, add the following configuration to your `vars.yml` file as below (adapt to your needs):
-
-```yaml
-# Set to `true` if mailer is enabled
-limesurvey_environment_variables_smtp_enabled: true
-
-# Set the hostname of the SMTP server
-limesurvey_environment_variables_smtp_host: ""
-
-# Set the port number of the SMTP server
-limesurvey_environment_variables_smtp_port: 587
-
-# Set the username for the SMTP server
-limesurvey_environment_variables_smtp_user: ""
-
-# Set the password for the SMTP server
-limesurvey_environment_variables_smtp_password: ""
-
-# Set the email address that emails will be sent from
-limesurvey_environment_variables_smtp_from: ""
-
-# Set to `true` if SSL is used for communication with the SMTP server
-limesurvey_environment_variables_smtp_secure: false
-```
-
-⚠️ **Note**: without setting an authentication method such as DKIM, SPF, and DMARC for your hostname, emails are most likely to be quarantined as spam at recipient's mail servers. If you have set up a mail server with the [MASH project's exim-relay Ansible role](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay), you can enable DKIM signing with it. Refer [its documentation](https://github.com/mother-of-all-self-hosting/ansible-role-exim-relay/blob/main/docs/configuring-exim-relay.md#enable-dkim-support-optional) for details.
-
-### Configuring rate limit
-
-By default the role enables the API rate limit. To disable it, add the following configuration to your `vars.yml` file:
-
-```yaml
-limesurvey_environment_variables_enable_rate_limit: false
-```
-
 ### Extending the configuration
 
 There are some additional things you may wish to configure about the component.
@@ -156,7 +92,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `limesurvey_environment_variables_additional_variables` variable
 
-See [the official documentation](https://github.com/thedevs-network/limesurvey/blob/main/.example.env) for a complete list of LimeSurvey's config options that you could put in `limesurvey_environment_variables_additional_variables`.
+See [the official documentation](https://hub.docker.com/r/acspri/limesurvey#how-to-use-this-image) for a complete list of LimeSurvey's config options that you could put in `limesurvey_environment_variables_additional_variables`.
 
 ## Installing
 

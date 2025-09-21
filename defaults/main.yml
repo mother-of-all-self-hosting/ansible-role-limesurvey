@@ -174,16 +174,6 @@ limesurvey_systemd_wanted_services_list_default: []
 limesurvey_systemd_wanted_services_list_auto: []
 limesurvey_systemd_wanted_services_list_custom: []
 
-# Specify a random string for signing authentication tokens
-# generated with `pwgen -s 64 1` or in another way.
-limesurvey_environment_variables_jwt_secret: ''
-
-# Note that this requires `limesurvey_environment_variables_mail_enabled` with related configurations to be `true`.
-limesurvey_environment_variables_disallow_registration: true
-
-limesurvey_environment_variables_disallow_anonymous_links: true
-limesurvey_environment_variables_trust_proxy: true
-
 # Specify a database driver to use
 # Valid values: better-sqlite3, sqlite3, mysql2, pg, pg-native
 # Note pg-native and sqlite3 are not installed by default.
@@ -206,26 +196,6 @@ limesurvey_database_postgres_password: ''
 limesurvey_database_postgres_ssl: false
 
 limesurvey_database_name: limesurvey
-
-# Control if an external Redis instance is used
-limesurvey_redis_hostname: ""
-limesurvey_redis_port: 6379
-limesurvey_redis_password: ""
-limesurvey_redis_database: 0
-
-limesurvey_environment_variables_enable_rate_limit: true
-
-# Specify mailer configuration
-limesurvey_environment_variables_smtp_enabled: false
-limesurvey_environment_variables_smtp_host: ""
-limesurvey_environment_variables_smtp_port: 587
-limesurvey_environment_variables_smtp_user: ""
-limesurvey_environment_variables_smtp_password: ""
-limesurvey_environment_variables_smtp_from: ""
-limesurvey_environment_variables_smtp_secure: false
-
-limesurvey_environment_variables_report_email: ""
-limesurvey_environment_variables_contact_email: ""
 
 # Additional environment variables.
 limesurvey_environment_variables_additional_variables: ''
