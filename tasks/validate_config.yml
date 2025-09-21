@@ -28,6 +28,8 @@
     - limesurvey_container_network
     - limesurvey_database_hostname
     - limesurvey_database_password
+    - limesurvey_environment_variables_admin_user
+    - limesurvey_environment_variables_admin_password
 
 - name: Run if Traefik is enabled
   when: limesurvey_container_labels_traefik_enabled | bool

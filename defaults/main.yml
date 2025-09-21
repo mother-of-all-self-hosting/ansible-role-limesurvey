@@ -182,5 +182,26 @@ limesurvey_database_password: ""
 limesurvey_database_name: limesurvey
 limesurvey_database_table_prefix: ""
 
+# Specify the username of the Limesurvey administrator
+limesurvey_environment_variables_admin_user: ""
+
+# Specify the password of the Limesurvey administrator
+limesurvey_environment_variables_admin_password: ""
+
+# Specify the full name of the Limesurvey administrator
+limesurvey_environment_variables_admin_name: "Lime Administrator"
+
+# Specify the email address of the Limesurvey administrator
+limesurvey_environment_variables_admin_email: "lime@lime.lime"
+
+# Specify debug level
+# Valid values: 0 (off), 1 (for errors), 2 (for strict PHP and to be able to edit standard templates)
+limesurvey_environment_variables_debug: 0
+
+# Specify SQL debug level
+# Valid values: 0 (off), 1 (on)
+# Setting 1 requires `limesurvey_environment_variables_debug` to be set to 2
+limesurvey_environment_variables_sql_debug: 0
+
 # Additional environment variables.
 limesurvey_environment_variables_additional_variables: ''

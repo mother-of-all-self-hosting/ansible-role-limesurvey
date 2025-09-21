@@ -78,6 +78,17 @@ limesurvey_database_password: YOUR_POSTGRES_SERVER_PASSWORD_HERE
 limesurvey_database_name: YOUR_POSTGRES_SERVER_DATABASE_NAME_HERE
 ```
 
+### Set administrator's account details
+
+You also need to specify administrator's account details by adding the following configuration to your `vars.yml` file:
+
+```yaml
+limesurvey_environment_variables_admin_user: LIMESURVEY_ADMIN_USERNAME_HERE
+limesurvey_environment_variables_admin_password: LIMESURVEY_ADMIN_PASSWORD_HERE
+limesurvey_environment_variables_admin_name: LIMESURVEY_ADMIN_NAME_HERE
+limesurvey_environment_variables_admin_email: LIMESURVEY_ADMIN_EMAIL_ADDRESS_HERE
+```
+
 ### Extending the configuration
 
 There are some additional things you may wish to configure about the component.
@@ -109,3 +120,11 @@ To get started, open the URL with a web browser, and register the administrator 
 ### Check the service's logs
 
 You can find the logs in [systemd-journald](https://www.freedesktop.org/software/systemd/man/systemd-journald.service.html) by logging in to the server with SSH and running `journalctl -fu limesurvey` (or how you/your playbook named the service, e.g. `mash-limesurvey`).
+
+#### Increase logging verbosity
+
+If you want to increase the verbosity, add the following configuration to your `vars.yml` file:
+
+```yaml
+limesurvey_environment_variables_debug: 2
+```
