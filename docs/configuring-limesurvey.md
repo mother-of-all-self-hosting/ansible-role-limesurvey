@@ -24,6 +24,9 @@ LimeSurvey is a modern URL shortener with support for custom domains with functi
 
 See the project's [documentation](https://github.com/thedevs-network/limesurvey/blob/main/README.md) to learn what LimeSurvey does and why it might be useful to you.
 
+>[!NOTE]
+> Since the developer team behind LimeSurvey [declared](https://bugs.limesurvey.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/limesurvey), which is a LimeSurvey Authorised Partner for Australia (see [this list](https://www.limesurvey.com/index.php/hosting) of partners for confirmation).
+
 ## Prerequisites
 
 To run a LimeSurvey instance it is necessary to prepare a database. You can use a [SQLite](https://www.sqlite.org/), [Postgres](https://www.postgresql.org/), or [MySQL](https://www.mysql.com/) compatible database server. By default it is configured to use SQLite.
