@@ -20,9 +20,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 This is an [Ansible](https://www.ansible.com/) role which installs [LimeSurvey](https://www.limesurvey.org) to run as a [Docker](https://www.docker.com/) container wrapped in a systemd service.
 
-LimeSurvey is a modern URL shortener with support for custom domains with functions like statistics and user management.
+LimeSurvey is a feature-rich free software for web based forms and surveys, which supports extensive survey logic.
 
-See the project's [documentation](https://hub.docker.com/r/acspri/limesurvey) to learn what LimeSurvey does and why it might be useful to you.
+See the project's [documentation](https://www.limesurvey.org/manual/LimeSurvey_Manual) to learn what LimeSurvey does and why it might be useful to you.
 
 >[!NOTE]
 > Since the developer team behind LimeSurvey [declared](https://bugs.limesurvey.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/limesurvey), which is a LimeSurvey Authorised Partner for Australia (see [this list](https://www.limesurvey.com/index.php/hosting) of partners for confirmation).
@@ -113,7 +113,7 @@ If you use the MASH playbook, the shortcut commands with the [`just` program](ht
 
 After running the command for installation, LimeSurvey becomes available at the specified hostname like `https://example.com`.
 
-To get started, open the URL with a web browser, and register the administrator account. You can create additional users (admin-privileged or not) after that.
+To get started, open the URL `https://example.com/index.php/admin` with a web browser, and log in to the instance with the administrator account credentials.
 
 ## Troubleshooting
 
