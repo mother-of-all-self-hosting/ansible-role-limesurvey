@@ -72,10 +72,10 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 To have the Limesurvey instance connect to your MySQL-compatible database server, add the following configuration to your `vars.yml` file.
 
 ```yaml
-limesurvey_database_hostname: YOUR_POSTGRES_SERVER_HOSTNAME_HERE
-limesurvey_database_username: YOUR_POSTGRES_SERVER_USERNAME_HERE
-limesurvey_database_password: YOUR_POSTGRES_SERVER_PASSWORD_HERE
-limesurvey_database_name: YOUR_POSTGRES_SERVER_DATABASE_NAME_HERE
+limesurvey_database_hostname: YOUR_MYSQL_SERVER_HOSTNAME_HERE
+limesurvey_database_username: YOUR_MYSQL_SERVER_USERNAME_HERE
+limesurvey_database_password: YOUR_MYSQL_SERVER_PASSWORD_HERE
+limesurvey_database_name: YOUR_MYSQL_SERVER_DATABASE_NAME_HERE
 ```
 
 ### Set administrator's account details
