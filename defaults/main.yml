@@ -19,13 +19,13 @@ limesurvey_upload_path: "{{ limesurvey_base_path }}/upload"
 # renovate: datasource=docker depName=acspri/limesurvey
 limesurvey_version: 6.15.22
 
-limesurvey_uid: ''
-limesurvey_gid: ''
+limesurvey_uid: ""
+limesurvey_gid: ""
 
 limesurvey_scheme: https
 
 # The hostname at which LimeSurvey is served.
-limesurvey_hostname: ''
+limesurvey_hostname: ""
 
 # The path at which LimeSurvey is exposed.
 # This value must either be `/` or not end with a slash (e.g. `/limesurvey`).
@@ -45,7 +45,7 @@ limesurvey_container_image_force_pull: "{{ limesurvey_container_image.endswith('
 # Controls whether the container exposes its HTTP port (tcp/80 in the container).
 #
 # Takes an "<ip>:<port>" or "<port>" value (e.g. "127.0.0.1:2586"), or empty string to not expose.
-limesurvey_container_http_host_bind_port: ''
+limesurvey_container_http_host_bind_port: ""
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
 limesurvey_container_network: "{{ limesurvey_identifier }}"
@@ -111,7 +111,7 @@ limesurvey_container_labels_traefik_additional_response_headers_custom: {}
 # limesurvey_container_labels_additional_labels: |
 #   my.label=1
 #   another.label="here"
-limesurvey_container_labels_additional_labels: ''
+limesurvey_container_labels_additional_labels: ""
 
 # A list of extra arguments to pass to the container (`docker run` command)
 limesurvey_container_extra_arguments: []
@@ -204,4 +204,4 @@ limesurvey_environment_variables_debug: 0
 limesurvey_environment_variables_sql_debug: 0
 
 # Additional environment variables.
-limesurvey_environment_variables_additional_variables: ''
+limesurvey_environment_variables_additional_variables: ""
