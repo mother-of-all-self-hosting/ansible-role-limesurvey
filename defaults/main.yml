@@ -175,6 +175,9 @@ limesurvey_systemd_wanted_services_list_default: []
 limesurvey_systemd_wanted_services_list_auto: []
 limesurvey_systemd_wanted_services_list_custom: []
 
+# Specify the timezone
+limesurvey_environment_variables_tz: UTC
+
 # Specify database configuration
 limesurvey_database_hostname: ""
 limesurvey_database_username: limesurvey
