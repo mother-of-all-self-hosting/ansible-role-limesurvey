@@ -116,7 +116,7 @@ limesurvey_container_labels_additional_labels: "{{ limesurvey_container_labels_a
 limesurvey_container_labels_additional_labels_auto: {}
 limesurvey_container_labels_additional_labels_custom: {}
 
-# A list of extra arguments to pass to the container (`docker run` command)
+# A list of extra arguments to pass to the container (`docker create` command)
 limesurvey_container_extra_arguments: "{{ limesurvey_container_extra_arguments_auto + limesurvey_container_extra_arguments_custom }}"
 limesurvey_container_extra_arguments_auto: []
 limesurvey_container_extra_arguments_custom: []
