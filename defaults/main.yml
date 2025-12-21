@@ -27,7 +27,7 @@ limesurvey_scheme: https
 # The hostname at which LimeSurvey is served.
 limesurvey_hostname: ""
 
-# The path at which LimeSurvey is exposed.
+# The path at which LimeSurvey is served.
 # This value must either be `/` or not end with a slash (e.g. `/limesurvey`).
 #
 # Hosting LimeSurvey under a subpath does not seem to be possible due to LimeSurvey's
