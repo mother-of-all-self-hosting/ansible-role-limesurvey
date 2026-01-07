@@ -56,4 +56,6 @@ traefik.http.routers.{{ limesurvey_identifier }}.tls.certResolver={{ limesurvey_
 traefik.http.services.{{ limesurvey_identifier }}.loadbalancer.server.port={{ limesurvey_container_http_port }}
 {% endif %}
 
-{{ limesurvey_container_labels_additional_labels }}
+{% for arg in limesurvey_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}
