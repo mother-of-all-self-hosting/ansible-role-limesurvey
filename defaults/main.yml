@@ -22,6 +22,7 @@ limesurvey_version: 6.16.4
 limesurvey_uid: ""
 limesurvey_gid: ""
 
+# The scheme used for serving LimeSurvey.
 limesurvey_scheme: https
 
 # The hostname at which LimeSurvey is served.
