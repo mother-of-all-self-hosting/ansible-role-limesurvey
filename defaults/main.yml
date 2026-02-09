@@ -17,7 +17,7 @@ limesurvey_plugin_path: "{{ limesurvey_base_path }}/plugins"
 limesurvey_upload_path: "{{ limesurvey_base_path }}/upload"
 
 # renovate: datasource=docker depName=acspri/limesurvey
-limesurvey_version: 6.16.7
+limesurvey_version: 6.16.8
 
 limesurvey_uid: ""
 limesurvey_gid: ""
