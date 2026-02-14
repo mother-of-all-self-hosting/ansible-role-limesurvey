@@ -65,6 +65,7 @@
       community.docker.docker_network:
         name: "{{ limesurvey_container_network }}"
         state: absent
+      register: limesurvey_network_deletion_result
 
     - name: Ensure LimeSurvey container network does not exist via ansible.builtin.command
       when: devture_systemd_docker_base_container_network_creation_method == 'command'
@@ -72,8 +73,8 @@
         cmd: >-
           {{ devture_systemd_docker_base_host_command_docker }} network rm
           {{ limesurvey_container_network }}
-      register: network_deletion_result
-      changed_when: limesurvey_container_network in network_deletion_result.stdout
+      register: limesurvey_network_deletion_result
+      changed_when: limesurvey_container_network in limesurvey_network_deletion_result.stdout
 
 - name: Check existence of LimeSurvey local path for config files
   ansible.builtin.stat:
