@@ -60,21 +60,24 @@
       changed_when: limesurvey_base_path_deletion_result.rc == 0
       failed_when: false
 
-    - name: Ensure LimeSurvey container network does not exist via community.docker.docker_network
-      when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
-      community.docker.docker_network:
-        name: "{{ limesurvey_container_network }}"
-        state: absent
-      register: limesurvey_network_deletion_result
+    - name: Ensure LimeSurvey container network does not exist
+      when: limesurvey_container_network_deletion_enabled
+      block:
+        - name: Ensure LimeSurvey container network does not exist via community.docker.docker_network
+          when: devture_systemd_docker_base_container_network_creation_method == 'ansible-module'
+          community.docker.docker_network:
+            name: "{{ limesurvey_container_network }}"
+            state: absent
+          register: limesurvey_network_deletion_result
 
-    - name: Ensure LimeSurvey container network does not exist via ansible.builtin.command
-      when: devture_systemd_docker_base_container_network_creation_method == 'command'
-      ansible.builtin.command:
-        cmd: >-
-          {{ devture_systemd_docker_base_host_command_docker }} network rm
-          {{ limesurvey_container_network }}
-      register: limesurvey_network_deletion_result
-      changed_when: limesurvey_container_network in limesurvey_network_deletion_result.stdout
+        - name: Ensure LimeSurvey container network does not exist via ansible.builtin.command
+          when: devture_systemd_docker_base_container_network_creation_method == 'command'
+          ansible.builtin.command:
+            cmd: >-
+              {{ devture_systemd_docker_base_host_command_docker }} network rm
+              {{ limesurvey_container_network }}
+          register: limesurvey_network_deletion_result
+          changed_when: limesurvey_container_network in limesurvey_network_deletion_result.stdout
 
 - name: Check existence of LimeSurvey local path for config files
   ansible.builtin.stat:
