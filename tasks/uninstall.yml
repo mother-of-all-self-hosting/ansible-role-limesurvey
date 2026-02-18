@@ -32,7 +32,7 @@
         - env
         - labels
 
-    - name: Ensure LimeSurvey local path for config files does not exist if empty
+    - name: Ensure LimeSurvey local path for configuration files does not exist if empty
       ansible.builtin.command:
         cmd: "rmdir {{ limesurvey_config_path }}"
       register: limesurvey_config_path_deletion_result
@@ -79,13 +79,13 @@
           register: limesurvey_network_deletion_result
           changed_when: limesurvey_container_network in limesurvey_network_deletion_result.stdout
 
-- name: Check existence of LimeSurvey local path for config files
+- name: Check existence of LimeSurvey local path for configuration files
   ansible.builtin.stat:
     path: "{{ limesurvey_config_path }}"
   register: limesurvey_config_path_stat
 
 # We just want to notify the user. Deleting data is too destructive.
-- name: Notify if LimeSurvey local config files remain
+- name: Notify if LimeSurvey local configuration files remain
   when: limesurvey_config_path_stat.stat.exists | bool
   ansible.builtin.set_fact:
     devture_playbook_runtime_messages_list: |
