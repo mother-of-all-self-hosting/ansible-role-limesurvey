@@ -225,16 +225,16 @@ limesurvey_database_password: ""
 limesurvey_database_name: limesurvey
 limesurvey_database_table_prefix: ""
 
-# Specify the username of the Limesurvey administrator
+# Specify the username of the LimeSurvey administrator
 limesurvey_environment_variables_admin_user: ""
 
-# Specify the password of the Limesurvey administrator
+# Specify the password of the LimeSurvey administrator
 limesurvey_environment_variables_admin_password: ""
 
-# Specify the full name of the Limesurvey administrator
+# Specify the full name of the LimeSurvey administrator
 limesurvey_environment_variables_admin_name: "Lime Administrator"
 
-# Specify the email address of the Limesurvey administrator
+# Specify the email address of the LimeSurvey administrator
 limesurvey_environment_variables_admin_email: "lime@lime.lime"
 
 # Specify debug level

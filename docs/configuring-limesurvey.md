@@ -69,7 +69,7 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 ### Set variables for connecting to a MySQL-compatible database server
 
-To have the Limesurvey instance connect to your MySQL-compatible database server, add the following configuration to your `vars.yml` file.
+To have the LimeSurvey instance connect to your MySQL-compatible database server, add the following configuration to your `vars.yml` file.
 
 ```yaml
 limesurvey_database_hostname: YOUR_MYSQL_SERVER_HOSTNAME_HERE
