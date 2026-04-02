@@ -67,7 +67,7 @@ After adjusting the hostname, make sure to adjust your DNS records to point the 
 
 **Note**: hosting LimeSurvey under a subpath (by configuring the `limesurvey_path_prefix` variable) does not seem to be possible due to LimeSurvey's technical limitations.
 
-### Set variables for connecting to a MySQL-compatible database server
+### Set variables for the database server
 
 To have the LimeSurvey instance connect to your MySQL-compatible database server, add the following configuration to your `vars.yml` file.
 
