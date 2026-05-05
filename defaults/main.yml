@@ -40,7 +40,6 @@ limesurvey_container_image_tag: "{{ limesurvey_version }}"
 limesurvey_container_image_registry_prefix: "{{ limesurvey_container_image_registry_prefix_upstream }}"
 limesurvey_container_image_registry_prefix_upstream: "{{ limesurvey_container_image_registry_prefix_upstream_default }}"
 limesurvey_container_image_registry_prefix_upstream_default: docker.io/
-limesurvey_container_image_force_pull: "{{ limesurvey_container_image.endswith(':latest') }}"
 # TODO: add tasks to self-build the image
 
 # The base container network. It will be auto-created by this role if it doesn't exist already.
