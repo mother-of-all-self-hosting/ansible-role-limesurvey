@@ -86,6 +86,9 @@ limesurvey_container_labels_traefik_priority: 0
 limesurvey_container_labels_traefik_entrypoints: web-secure
 limesurvey_container_labels_traefik_tls: "{{ limesurvey_container_labels_traefik_entrypoints != 'web' }}"
 limesurvey_container_labels_traefik_tls_certResolver: default  # noqa var-naming
+limesurvey_container_labels_traefik_middleware_basic_auth_enabled: false
+# See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
+limesurvey_container_labels_traefik_middleware_basic_auth_users: ""
 
 # Controls which additional headers to attach to all HTTP requests.
 # To add your own custom request headers, use `limesurvey_container_labels_traefik_additional_request_headers_custom`
