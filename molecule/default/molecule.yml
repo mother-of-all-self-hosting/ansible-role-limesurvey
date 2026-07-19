@@ -1,0 +1,88 @@
+# SPDX-FileCopyrightText: 2026 Suguru Hirahara
+# SPDX-FileCopyrightText: 2026 spatterlight
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+driver:
+  name: docker
+platforms:
+  - name: limesurvey-${MOLECULE_DISTRO:-ubuntu2604}-default
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2604}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callback_result_format: yaml
+  inventory:
+    group_vars:
+      all:
+        # Helper variables
+        limesurvey_debug_service_enabled: false
+
+        # Variables for LimeSurvey
+        limesurvey_uid: 1000
+        limesurvey_gid: 1000
+        limesurvey_hostname: localhost
+        limesurvey_container_labels_traefik_enabled: false
+        limesurvey_container_http_host_bind_port: 80
+        limesurvey_environment_variables_admin_user: user
+        limesurvey_environment_variables_admin_password: pass
+        limesurvey_environment_variables_admin_name: admin
+        limesurvey_environment_variables_admin_email: example@example.com
+
+        # Variables required for LimeSurvey to connect to the MariaDB database
+        limesurvey_database_hostname: "{{ mariadb_connection_hostname }}"
+        limesurvey_database_port: "{{ mariadb_connection_port }}"
+        limesurvey_database_username: my_database_username
+        limesurvey_database_password: my_database_password
+        limesurvey_database_name: limesurvey
+        limesurvey_systemd_required_services_list_auto: |
+          {{
+            (['mariadb.service'])
+          }}
+
+        # Variables for MariaDB
+        mariadb_uid: 1000
+        mariadb_gid: 1000
+        mariadb_root_password: mariadb_password
+        mariadb_container_network: "{{ limesurvey_container_network }}"
+        mariadb_managed_databases: |
+          {{
+            [{
+              'name': limesurvey_database_name,
+              'username': limesurvey_database_username,
+              'password': limesurvey_database_password,
+            }]
+          }}
+  env:
+    # Workaround for https://github.com/ansible/molecule/issues/4391
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
+scenario:
+  # See: https://docs.ansible.com/projects/molecule/configuration/?h=test_sequence#scenario
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Disable idempotence test for now due to ansible-role-mariadb
+    # - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
+verifier:
+  name: ansible
