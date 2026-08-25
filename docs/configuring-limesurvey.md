@@ -1,6 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2020 - 2024 MDAD project contributors
-SPDX-FileCopyrightText: 2020 - 2024 Slavi Pantaleev
+SPDX-FileCopyrightText: 2020 - 2024, 2026 Slavi Pantaleev
 SPDX-FileCopyrightText: 2020 Aaron Raimist
 SPDX-FileCopyrightText: 2020 Chris van Dijk
 SPDX-FileCopyrightText: 2020 Dominik Zajac
@@ -76,6 +76,12 @@ limesurvey_database_hostname: YOUR_MYSQL_SERVER_HOSTNAME_HERE
 limesurvey_database_username: YOUR_MYSQL_SERVER_USERNAME_HERE
 limesurvey_database_password: YOUR_MYSQL_SERVER_PASSWORD_HERE
 limesurvey_database_name: YOUR_MYSQL_SERVER_DATABASE_NAME_HERE
+```
+
+If the database server does not listen on the default port (`3306`), set the port explicitly as well:
+
+```yaml
+limesurvey_database_port: 3307
 ```
 
 ### Set administrator's account details

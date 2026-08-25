@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Nikita Chernyi
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 - 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2024 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2024 Sergio Durigan Junior
 # SPDX-FileCopyrightText: 2025 MASH project contributors
@@ -222,6 +222,15 @@ limesurvey_environment_variables_tz: UTC
 
 # Specify database configuration
 limesurvey_database_hostname: ""
+
+# The port number that the database server listens on.
+#
+# The container image defaults to 3306 when `LIMESURVEY_DB_PORT` is not passed to it,
+# but the role always passes it explicitly, so this value must not be left empty.
+# Leaving it empty makes the container's entrypoint wait forever for a database
+# on an unspecified port, without the service ever failing.
+limesurvey_database_port: 3306
+
 limesurvey_database_username: limesurvey
 limesurvey_database_password: ""
 limesurvey_database_name: limesurvey

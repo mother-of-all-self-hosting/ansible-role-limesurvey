@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Julian-Samuel Gebühr
 # SPDX-FileCopyrightText: 2023 MASH project contributors
-# SPDX-FileCopyrightText: 2023 - 2025 Slavi Pantaleev
+# SPDX-FileCopyrightText: 2023 - 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2025 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -28,6 +28,7 @@
     - limesurvey_path_prefix
     - limesurvey_container_network
     - limesurvey_database_hostname
+    - limesurvey_database_port
     - limesurvey_database_password
     - limesurvey_environment_variables_admin_user
     - limesurvey_environment_variables_admin_password
