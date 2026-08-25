@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023 Slavi Pantaleev
+SPDX-FileCopyrightText: 2023, 2026 Slavi Pantaleev
 SPDX-FileCopyrightText: 2025, 2026 Suguru Hirahara
 
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -35,3 +35,13 @@ just prek-install-git-pre-commit-hook
 This role supports [Molecule](https://docs.ansible.com/projects/molecule/), an Ansible testing framework designed for developing and testing Ansible collections, playbooks, and roles.
 
 Refer to [this page](./molecule/README.md) for details about how to utilize it.
+
+### Releases
+
+Release tags are cut automatically, and are derived from the repository's state rather than from commit messages. On every push to the main branch, [`bin/compute-next-tag.sh`](./bin/compute-next-tag.sh) reads `limesurvey_version` out of [`defaults/main.yml`](defaults/main.yml) and the tags that already exist, and prints the tag that the commit should be released as:
+
+- a LimeSurvey version that has never been released starts a fresh release counter (`v7.0.12-0`)
+- any other change to `defaults/`, `meta/`, `tasks/` or `templates/` increments it (`v7.0.12-1`)
+- a change that only touches documentation, CI configuration or the Molecule tests is not released at all
+
+Because the version is read from `defaults/main.yml` and not from the commit that happened to land, the result does not depend on the order in which pull requests get merged. Run `bin/test-compute-next-tag.sh` to exercise the computation; it is also wired up as a pre-commit hook.
