@@ -84,6 +84,15 @@ provisioner:
         mariadb_gid: 1000
         mariadb_root_password: mariadb_password
         mariadb_container_network: "{{ limesurvey_container_network }}"
+
+        # ansible-role-mariadb sleeps for this long after starting MariaDB and
+        # then runs the database initialization once, without retrying. Its
+        # default of 15 seconds is not enough for a MariaDB starting inside a
+        # Docker-in-Docker test container on a loaded machine, and the run then
+        # fails with `Can't connect to server on 'mariadb' (115)`, which reads
+        # like a fault in this role and is not one.
+        mariadb_managed_databases_service_start_wait_timeout_seconds: 45
+
         mariadb_managed_databases: |
           {{
             [{
