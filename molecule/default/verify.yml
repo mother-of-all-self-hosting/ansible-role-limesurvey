@@ -1,15 +1,96 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 spatterlight
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Verify LimeSurvey systemd service
+# What an unconfigured/uninstalled LimeSurvey does, established by hand against
+# the acspri/limesurvey:7.0.11 image before these assertions were written:
+#
+# - with no database reachable at all, the entrypoint loops on
+#   `nc -z LIMESURVEY_DB_HOST LIMESURVEY_DB_PORT` and Apache is never started,
+#   so nothing answers on port 80;
+# - with a database reachable but the schema not installed (which is what
+#   happens when no administrator credentials are passed), Apache does start and
+#   answers every path - `/`, `/index.php`, `/index.php/admin`,
+#   `/index.php/installer` - with 500, never with the installer wizard that
+#   catches out so many PHP applications.
+#
+# So the load-bearing HTTP assertion below is not "something answered" but
+# "`/index.php/admin` answers exactly 302 and points at the administrator login
+# page", which an uninstalled instance cannot produce.
+
+- name: Verify LimeSurvey
   hosts: all
   become: true
   gather_facts: false
+
+  vars:
+    limesurvey_base_path: "/{{ limesurvey_identifier }}"
+
+    # Reaching MariaDB through its own container, rather than through
+    # LimeSurvey, is what makes the database assertions independent of the
+    # application: they see what is really stored, not what LimeSurvey claims.
+    limesurvey_mariadb_argv:
+      - docker
+      - exec
+      - "{{ mariadb_identifier }}"
+      - mariadb
+      - "--user={{ limesurvey_database_username }}"
+      - "--password={{ limesurvey_database_password }}"
+      - "--database={{ limesurvey_database_name }}"
+      - -N
+      - -B
+      - -e
+
+    # Performs one administrator login against LimeSurvey from inside its own
+    # container (the image ships curl; the geerlingguy test images do not) and
+    # prints the URL that LimeSurvey redirects to afterwards. LimeSurvey sends a
+    # successful login to the administration dashboard and a failed one back to
+    # the login form, so the printed URL says whether the credentials worked.
+    #
+    # The password is the first positional argument, so that the same probe can
+    # be run with a deliberately wrong one - without that control, "the login
+    # redirected somewhere" would not be evidence of anything.
+    limesurvey_login_probe_script: |
+      set -eu
+
+      login_url="http://127.0.0.1:80/index.php/admin/authentication/sa/login"
+      jar="$(mktemp)"
+      page="$(mktemp)"
+      trap 'rm -f "$jar" "$page"' EXIT
+
+      curl --silent --show-error --max-time 30 --cookie-jar "$jar" --output "$page" "$login_url"
+
+      token="$(grep -oE 'value="[^"]+" name="YII_CSRF_TOKEN"' "$page" | head -n1 | sed -E 's/value="([^"]+)".*/\1/')"
+      if [ -z "$token" ]; then
+        echo "Could not find a CSRF token on the login page" >&2
+        exit 1
+      fi
+
+      curl --silent --show-error --max-time 30 \
+        --cookie "$jar" --cookie-jar "$jar" \
+        --output /dev/null --write-out '%{redirect_url}\n' \
+        --data-urlencode "YII_CSRF_TOKEN=$token" \
+        --data-urlencode "user={{ limesurvey_environment_variables_admin_user }}" \
+        --data-urlencode "password=$1" \
+        --data authMethod=Authdb \
+        --data action=login \
+        --data width=1000 \
+        --data login_submit=login \
+        "$login_url"
+
   tasks:
-    - name: Wait for LimeSurvey service to become active (up to 180s)
+    # Namespaced, because `include_vars` outranks the scenario's group_vars and
+    # would otherwise replace the values this scenario deliberately tuned.
+    # Only `limesurvey_version` is read from it, and that is a leaf literal.
+    - name: Read the role's own defaults
+      ansible.builtin.include_vars:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+        name: limesurvey_role_defaults
+
+    - name: Wait for the LimeSurvey service to become active (up to 180s)
       ansible.builtin.systemd:
         name: limesurvey.service
       register: limesurvey_service
@@ -17,37 +98,228 @@
       retries: 36
       delay: 5
 
-    - name: Assert LimeSurvey service is active
+    # `Restart=always` makes a crash-looping container look active, so this is
+    # a precondition for the assertions below rather than a result in itself.
+    - name: Assert the LimeSurvey service is active
       ansible.builtin.assert:
         that: limesurvey_service.status.ActiveState == 'active'
-        fail_msg: "limesurvey.service not active ({{ limesurvey_service.status.ActiveState }})"
+        fail_msg: "limesurvey.service is not active ({{ limesurvey_service.status.ActiveState }})"
         success_msg: "limesurvey.service is active"
 
-    - name: Retrieve LimeSurvey service log for debugging
+    - name: Retrieve the LimeSurvey service log for debugging
       when: limesurvey_debug_service_enabled | bool
       ansible.builtin.command:
         cmd: journalctl -xeu limesurvey.service
       changed_when: false
 
-    - name: Wait for LimeSurvey HTTP endpoint to respond (up to 10m)
+    # 500 is what an installed-but-not-provisioned LimeSurvey answers, and it is
+    # tolerated here only so that the retry loop can keep waiting through the
+    # schema installation instead of failing on the first attempt.
+    - name: Wait for LimeSurvey to finish installing its schema (up to 300s)
       ansible.builtin.uri:
-        url: "http://localhost:80/index.php/admin"
+        url: "http://127.0.0.1:{{ limesurvey_container_http_host_bind_port }}/index.php/admin"
         method: GET
-        status_code: [200, 302, 307]
         follow_redirects: none
-      register: limesurvey_endpoint
-      until: limesurvey_endpoint.status in [200, 302, 307]
-      retries: 120
+        status_code: [200, 302, 500, 502, 503]
+      register: limesurvey_admin_endpoint
+      until: limesurvey_admin_endpoint.status == 302
+      retries: 60
       delay: 5
 
-    - name: Assert LimeSurvey HTTP endpoint responds
+    - name: Assert /index.php/admin redirects rather than serving an error or a wizard
       ansible.builtin.assert:
-        that: limesurvey_endpoint.status in [200, 302, 307]
-        fail_msg: "LimeSurvey did not respond as expected ({{ limesurvey_endpoint.status | default('no response') }})"
-        success_msg: "LimeSurvey responded with {{ limesurvey_endpoint.status }}"
+        that: limesurvey_admin_endpoint.status == 302
+        fail_msg: >-
+          /index.php/admin answered {{ limesurvey_admin_endpoint.status }} instead of 302.
+          An uninstalled LimeSurvey answers 500 on every path.
+        success_msg: "/index.php/admin answered 302"
 
-    - name: Show LimeSurvey systemd service status summary
+    - name: Assert /index.php/admin redirects to the administrator login page
+      ansible.builtin.assert:
+        that: limesurvey_admin_endpoint.location | default('') is search('/index[.]php/admin/authentication/sa/login$')
+        fail_msg: "/index.php/admin redirected to {{ limesurvey_admin_endpoint.location | default('nowhere') }}"
+        success_msg: "/index.php/admin redirected to the administrator login page"
+
+    - name: Retrieve the LimeSurvey version that is actually running
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - "{{ limesurvey_identifier }}"
+          - php
+          - -r
+          - '$c = require "/var/www/html/application/config/version.php"; echo $c["versionnumber"];'
+      register: limesurvey_running_version
+      changed_when: false
+
+    # This is what makes a Renovate bump of `limesurvey_version` meaningful:
+    # a bump that CI passes has demonstrably run the version it bumped to.
+    - name: Assert the running LimeSurvey version is the one the role pins
+      ansible.builtin.assert:
+        that: limesurvey_running_version.stdout | trim == limesurvey_role_defaults.limesurvey_version | string
+        fail_msg: >-
+          LimeSurvey reports version {{ limesurvey_running_version.stdout | trim }},
+          but defaults/main.yml pins {{ limesurvey_role_defaults.limesurvey_version }}
+        success_msg: "LimeSurvey is running {{ limesurvey_running_version.stdout | trim }}, as pinned by the role"
+
+    - name: Read the environment file the role rendered
+      ansible.builtin.slurp:
+        src: "{{ limesurvey_base_path }}/env"
+      register: limesurvey_env_file
+
+    # The role's half of the contract: these lines exist because the role's
+    # templates/env.j2 put them there. Removing any one of them from the
+    # template fails here and nowhere else.
+    - name: Assert the rendered environment file carries the configured database settings
+      ansible.builtin.assert:
+        that:
+          - "('LIMESURVEY_DB_HOST=' ~ limesurvey_database_hostname) in limesurvey_env_lines"
+          - "('LIMESURVEY_DB_PORT=' ~ limesurvey_database_port) in limesurvey_env_lines"
+          - "('LIMESURVEY_DB_NAME=' ~ limesurvey_database_name) in limesurvey_env_lines"
+          - "('LIMESURVEY_TABLE_PREFIX=' ~ limesurvey_database_table_prefix) in limesurvey_env_lines"
+          - "('LIMESURVEY_ADMIN_USER=' ~ limesurvey_environment_variables_admin_user) in limesurvey_env_lines"
+          - "('LIMESURVEY_ADMIN_EMAIL=' ~ limesurvey_environment_variables_admin_email) in limesurvey_env_lines"
+        fail_msg: "The rendered environment file does not carry the configured database and administrator settings"
+        success_msg: "The rendered environment file carries the configured database and administrator settings"
+      vars:
+        limesurvey_env_lines: "{{ (limesurvey_env_file.content | b64decode).splitlines() }}"
+
+    - name: Read the configuration file LimeSurvey wrote for itself
+      ansible.builtin.slurp:
+        src: "{{ limesurvey_base_path }}/config/config.php"
+      register: limesurvey_config_file
+
+    # The other half: LimeSurvey's entrypoint reads that environment file and
+    # rewrites application/config/config.php from it on every start, so finding
+    # the values here proves they reached the process rather than merely having
+    # been written to disk by Ansible.
+    - name: Assert LimeSurvey's own configuration was built from those settings
+      ansible.builtin.assert:
+        that:
+          - limesurvey_config_contents is search(limesurvey_expected_connection_string | regex_escape)
+          - limesurvey_config_contents is search("'tablePrefix'[^,]*'" ~ (limesurvey_database_table_prefix | regex_escape) ~ "'")
+        fail_msg: >-
+          LimeSurvey's config.php does not contain the expected connection string
+          ({{ limesurvey_expected_connection_string }}) and table prefix
+          ({{ limesurvey_database_table_prefix }})
+        success_msg: "LimeSurvey's config.php was built from the role's environment file"
+      vars:
+        limesurvey_config_contents: "{{ limesurvey_config_file.content | b64decode }}"
+        limesurvey_expected_connection_string: >-
+          mysql:host={{ limesurvey_database_hostname }};port={{ limesurvey_database_port }};dbname={{ limesurvey_database_name }};
+
+    - name: Count the LimeSurvey tables in MariaDB, by prefix
+      ansible.builtin.command:
+        argv: "{{ limesurvey_mariadb_argv + [limesurvey_table_count_query] }}"
+      vars:
+        limesurvey_table_count_query: >-
+          SELECT
+          SUM(table_name LIKE '{{ limesurvey_database_table_prefix }}%'),
+          SUM(table_name NOT LIKE '{{ limesurvey_database_table_prefix }}%')
+          FROM information_schema.tables
+          WHERE table_schema = '{{ limesurvey_database_name }}';
+      register: limesurvey_table_counts
+      changed_when: false
+
+    # Rejects both the "no schema at all" case and the "LimeSurvey ignored the
+    # table prefix" case in one go. LimeSurvey has no SQLite or in-memory
+    # fallback, so tables under this prefix can only exist here because the
+    # configured MariaDB really is the backing store.
+    - name: Assert LimeSurvey installed its schema into MariaDB under the configured prefix
+      ansible.builtin.assert:
+        that:
+          - (limesurvey_table_counts.stdout.split() | first | int) > 30
+          - (limesurvey_table_counts.stdout.split() | last | int) == 0
+        fail_msg: >-
+          MariaDB holds {{ limesurvey_table_counts.stdout.split() | first }} tables prefixed with
+          `{{ limesurvey_database_table_prefix }}` and
+          {{ limesurvey_table_counts.stdout.split() | last }} without that prefix
+        success_msg: >-
+          MariaDB holds {{ limesurvey_table_counts.stdout.split() | first }} tables,
+          all prefixed with `{{ limesurvey_database_table_prefix }}`
+
+    - name: Read the administrator account LimeSurvey created in MariaDB
+      ansible.builtin.command:
+        argv: "{{ limesurvey_mariadb_argv + [limesurvey_admin_row_query] }}"
+      vars:
+        limesurvey_admin_row_query: >-
+          SELECT CONCAT_WS('|', users_name, full_name, email, IFNULL(last_login, ''))
+          FROM {{ limesurvey_database_table_prefix }}users
+          WHERE users_name = '{{ limesurvey_environment_variables_admin_user }}';
+      register: limesurvey_admin_row_before
+      changed_when: false
+
+    - name: Assert the administrator row matches what the role configured
+      ansible.builtin.assert:
+        that: limesurvey_admin_row_before.stdout | trim == limesurvey_expected_admin_row
+        fail_msg: >-
+          MariaDB holds `{{ limesurvey_admin_row_before.stdout | trim }}`,
+          expected `{{ limesurvey_expected_admin_row }}`
+        success_msg: "The administrator row in MariaDB matches the role's configuration"
+      vars:
+        limesurvey_expected_admin_row: >-
+          {{ limesurvey_environment_variables_admin_user }}|{{ limesurvey_environment_variables_admin_name }}|{{ limesurvey_environment_variables_admin_email }}|
+
+    - name: Log in to LimeSurvey with the correct and with an incorrect password
+      ansible.builtin.command:
+        argv:
+          - docker
+          - exec
+          - "{{ limesurvey_identifier }}"
+          - bash
+          - -c
+          - "{{ limesurvey_login_probe_script }}"
+          - limesurvey-login-probe
+          - "{{ item }}"
+      register: limesurvey_login_probe
+      changed_when: false
+      loop:
+        - "{{ limesurvey_environment_variables_admin_password }}"
+        - definitely-not-the-administrator-password
+
+    - name: Assert the correct password logs the administrator in
+      ansible.builtin.assert:
+        that: limesurvey_login_probe.results[0].stdout | trim is search('/index[.]php/admin/index$')
+        fail_msg: >-
+          Logging in with the configured password led to
+          `{{ limesurvey_login_probe.results[0].stdout | trim }}` instead of the administration dashboard
+        success_msg: "The password the role configured logs the administrator in"
+
+    # Without this, the assertion above would also pass against a LimeSurvey
+    # that sent every login attempt to the dashboard.
+    - name: Assert an incorrect password does not log the administrator in
+      ansible.builtin.assert:
+        that: limesurvey_login_probe.results[1].stdout | trim is search('/index[.]php/admin/authentication/sa/login$')
+        fail_msg: >-
+          Logging in with a wrong password led to
+          `{{ limesurvey_login_probe.results[1].stdout | trim }}` instead of back to the login form
+        success_msg: "A wrong password is rejected"
+
+    - name: Re-read the administrator's last login from MariaDB
+      ansible.builtin.command:
+        argv: "{{ limesurvey_mariadb_argv + [limesurvey_last_login_query] }}"
+      vars:
+        limesurvey_last_login_query: >-
+          SELECT IFNULL(last_login, '') FROM {{ limesurvey_database_table_prefix }}users
+          WHERE users_name = '{{ limesurvey_environment_variables_admin_user }}';
+      register: limesurvey_admin_last_login
+      changed_when: false
+
+    # The round trip: a request served over HTTP by the LimeSurvey container
+    # left a row change that is visible from inside the MariaDB container. It
+    # was empty before the login (asserted above, as part of the administrator
+    # row) and carries a timestamp afterwards.
+    - name: Assert the login was recorded in MariaDB
+      ansible.builtin.assert:
+        that: (limesurvey_admin_last_login.stdout | trim) | length > 0
+        fail_msg: "LimeSurvey did not record the administrator's login in MariaDB"
+        success_msg: "LimeSurvey recorded the administrator's login in MariaDB at {{ limesurvey_admin_last_login.stdout | trim }}"
+
+    - name: Show a summary
       ansible.builtin.debug:
         msg:
-          - "LimeSurvey systemd: {{ limesurvey_service.status.ActiveState }}"
-          - "LimeSurvey HTTP: {{ limesurvey_endpoint.status }}"
+          - "systemd: {{ limesurvey_service.status.ActiveState }}"
+          - "HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
+          - "version: {{ limesurvey_running_version.stdout | trim }}"
+          - "MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
+          - "administrator last login: {{ limesurvey_admin_last_login.stdout | trim }}"

@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
 # SPDX-FileCopyrightText: 2026 spatterlight
 # SPDX-FileCopyrightText: 2026 Suguru Hirahara
 #
@@ -31,16 +32,29 @@ provisioner:
         # Helper variables
         limesurvey_debug_service_enabled: false
 
+        # Spelled out (both match the respective role's default) so that the
+        # verification playbook, which does not include the roles and therefore
+        # has neither role's defaults in scope, can address the two containers
+        # and the paths on the host by name.
+        limesurvey_identifier: limesurvey
+        mariadb_identifier: mariadb
+
         # Variables for LimeSurvey
         limesurvey_uid: 1000
         limesurvey_gid: 1000
         limesurvey_hostname: localhost
         limesurvey_container_labels_traefik_enabled: false
         limesurvey_container_http_host_bind_port: 80
-        limesurvey_environment_variables_admin_user: user
-        limesurvey_environment_variables_admin_password: pass
-        limesurvey_environment_variables_admin_name: admin
-        limesurvey_environment_variables_admin_email: example@example.com
+
+        # Deliberately unlike anything the container image would arrive at on
+        # its own. The image defaults the administrator to `Lime Administrator`
+        # / `lime@lime.lime`, which are also this role's defaults, so leaving
+        # them alone would leave the verification unable to tell a value that
+        # the role rendered apart from one that nobody configured.
+        limesurvey_environment_variables_admin_user: molecule_admin
+        limesurvey_environment_variables_admin_password: molecule_password
+        limesurvey_environment_variables_admin_name: MASH Molecule Administrator
+        limesurvey_environment_variables_admin_email: molecule@example.com
 
         # Variables required for LimeSurvey to connect to the MariaDB database
         limesurvey_database_hostname: "{{ mariadb_connection_hostname }}"
@@ -48,6 +62,14 @@ provisioner:
         limesurvey_database_username: my_database_username
         limesurvey_database_password: my_database_password
         limesurvey_database_name: limesurvey
+
+        # The image leaves the table prefix empty when `LIMESURVEY_TABLE_PREFIX`
+        # is not passed to it, and LimeSurvey's own sample configuration uses
+        # `lime_`. A prefix that is neither proves, once the tables turn up
+        # under it in MariaDB, that the schema was created by a LimeSurvey which
+        # read this role's rendered environment file.
+        limesurvey_database_table_prefix: mashls_
+
         limesurvey_systemd_required_services_list_auto: |
           {{
             (['mariadb.service'])
