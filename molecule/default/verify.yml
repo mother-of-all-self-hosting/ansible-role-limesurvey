@@ -44,6 +44,10 @@
       - -B
       - -e
 
+    limesurvey_last_login_query: >-
+      SELECT IFNULL(last_login, '') FROM {{ limesurvey_database_table_prefix }}users
+      WHERE users_name = '{{ limesurvey_environment_variables_admin_user }}';
+
     # Performs one administrator login against LimeSurvey from inside its own
     # container (the image ships curl; the geerlingguy test images do not) and
     # prints the URL that LimeSurvey redirects to afterwards. LimeSurvey sends a
@@ -243,22 +247,39 @@
         argv: "{{ limesurvey_mariadb_argv + [limesurvey_admin_row_query] }}"
       vars:
         limesurvey_admin_row_query: >-
-          SELECT CONCAT_WS('|', users_name, full_name, email, IFNULL(last_login, ''))
+          SELECT CONCAT_WS('|', users_name, full_name, email)
           FROM {{ limesurvey_database_table_prefix }}users
           WHERE users_name = '{{ limesurvey_environment_variables_admin_user }}';
-      register: limesurvey_admin_row_before
+      register: limesurvey_admin_row
       changed_when: false
 
     - name: Assert the administrator row matches what the role configured
       ansible.builtin.assert:
-        that: limesurvey_admin_row_before.stdout | trim == limesurvey_expected_admin_row
+        that: limesurvey_admin_row.stdout | trim == limesurvey_expected_admin_row
         fail_msg: >-
-          MariaDB holds `{{ limesurvey_admin_row_before.stdout | trim }}`,
+          MariaDB holds `{{ limesurvey_admin_row.stdout | trim }}`,
           expected `{{ limesurvey_expected_admin_row }}`
         success_msg: "The administrator row in MariaDB matches the role's configuration"
       vars:
         limesurvey_expected_admin_row: >-
-          {{ limesurvey_environment_variables_admin_user }}|{{ limesurvey_environment_variables_admin_name }}|{{ limesurvey_environment_variables_admin_email }}|
+          {{ limesurvey_environment_variables_admin_user }}|{{ limesurvey_environment_variables_admin_name }}|{{ limesurvey_environment_variables_admin_email }}
+
+    - name: Note when the administrator last logged in, before logging in
+      ansible.builtin.command:
+        argv: "{{ limesurvey_mariadb_argv + [limesurvey_last_login_query] }}"
+      register: limesurvey_last_login_before
+      changed_when: false
+
+    # LimeSurvey locks an IP address out for ten minutes after three failed
+    # logins (maxLoginAttempt/timeOutTime in config-defaults.php). One run only
+    # ever spends one of those attempts - the wrong-password control below, and
+    # it deliberately runs after the successful login rather than before it -
+    # but attempts left behind by an earlier run against the same instance
+    # would otherwise be able to lock this one out of its own positive case.
+    - name: Clear LimeSurvey's brute-force lockout
+      ansible.builtin.command:
+        argv: "{{ limesurvey_mariadb_argv + ['DELETE FROM ' ~ limesurvey_database_table_prefix ~ 'failed_login_attempts;'] }}"
+      changed_when: false
 
     - name: Log in to LimeSurvey with the correct and with an incorrect password
       ansible.builtin.command:
@@ -298,22 +319,24 @@
     - name: Re-read the administrator's last login from MariaDB
       ansible.builtin.command:
         argv: "{{ limesurvey_mariadb_argv + [limesurvey_last_login_query] }}"
-      vars:
-        limesurvey_last_login_query: >-
-          SELECT IFNULL(last_login, '') FROM {{ limesurvey_database_table_prefix }}users
-          WHERE users_name = '{{ limesurvey_environment_variables_admin_user }}';
-      register: limesurvey_admin_last_login
+      register: limesurvey_last_login_after
       changed_when: false
 
     # The round trip: a request served over HTTP by the LimeSurvey container
-    # left a row change that is visible from inside the MariaDB container. It
-    # was empty before the login (asserted above, as part of the administrator
-    # row) and carries a timestamp afterwards.
+    # left a row change that is visible from inside the MariaDB container.
+    # Comparing against the value from before the login, rather than merely
+    # requiring a non-empty one, keeps this honest on an instance that has been
+    # verified before.
     - name: Assert the login was recorded in MariaDB
       ansible.builtin.assert:
-        that: (limesurvey_admin_last_login.stdout | trim) | length > 0
-        fail_msg: "LimeSurvey did not record the administrator's login in MariaDB"
-        success_msg: "LimeSurvey recorded the administrator's login in MariaDB at {{ limesurvey_admin_last_login.stdout | trim }}"
+        that:
+          - (limesurvey_last_login_after.stdout | trim) | length > 0
+          - (limesurvey_last_login_after.stdout | trim) != (limesurvey_last_login_before.stdout | trim)
+        fail_msg: >-
+          LimeSurvey did not record the administrator's login in MariaDB
+          (last_login was `{{ limesurvey_last_login_before.stdout | trim }}` before the login
+          and `{{ limesurvey_last_login_after.stdout | trim }}` after it)
+        success_msg: "LimeSurvey recorded the administrator's login in MariaDB at {{ limesurvey_last_login_after.stdout | trim }}"
 
     - name: Show a summary
       ansible.builtin.debug:
@@ -322,4 +345,4 @@
           - "HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
           - "version: {{ limesurvey_running_version.stdout | trim }}"
           - "MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
-          - "administrator last login: {{ limesurvey_admin_last_login.stdout | trim }}"
+          - "administrator last login: {{ limesurvey_last_login_after.stdout | trim }}"

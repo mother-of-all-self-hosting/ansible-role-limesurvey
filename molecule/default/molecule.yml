@@ -32,12 +32,16 @@ provisioner:
         # Helper variables
         limesurvey_debug_service_enabled: false
 
-        # Spelled out (both match the respective role's default) so that the
-        # verification playbook, which does not include the roles and therefore
-        # has neither role's defaults in scope, can address the two containers
-        # and the paths on the host by name.
+        # Spelled out (all of these match the respective role's default) so
+        # that the verification playbook, which does not include the roles and
+        # therefore has neither role's defaults in scope, can address the two
+        # containers, the paths on the host and the database connection by
+        # name. Referring to a variable that only exists once a role has been
+        # included leaves the scenario unable to verify what it configured.
         limesurvey_identifier: limesurvey
         mariadb_identifier: mariadb
+        mariadb_connection_hostname: "{{ mariadb_identifier }}"
+        mariadb_connection_port: 3306
 
         # Variables for LimeSurvey
         limesurvey_uid: 1000
