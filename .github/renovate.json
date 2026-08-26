@@ -8,6 +8,6 @@
     "`versioning=semver` on the annotation in defaults/main.yml is load-bearing, and was verified against the registry rather than assumed. acspri/limesurvey publishes 722 tags; strict semver leaves the 483 real X.Y.Z releases and skips the rest as prereleases or non-versions: 186 `-lts` and 5 `-ltsnovol` tags of the 3.x maintenance line, 13 `-rcN`, one `-arm`, 25 four-part tags such as 3.15.0.1, a bare `5`, `latest`, `lts`, `development`, `developmajor` and a stray `7.0.0-`. Under Docker's default versioning the four-part tags would become candidates, and the suffixed ones would be read as a compatibility suffix the role's pin does not carry."
   ],
   "extends": [
-    "github>mother-of-all-self-hosting/renovate-config#v1.0.0"
+    "github>mother-of-all-self-hosting/renovate-config#v1.1.0"
   ]
 }
