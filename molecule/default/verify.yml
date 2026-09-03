@@ -156,8 +156,6 @@
       register: limesurvey_running_version
       changed_when: false
 
-    # This is what makes a Renovate bump of `limesurvey_version` meaningful:
-    # a bump that CI passes has demonstrably run the version it bumped to.
     - name: Assert the running LimeSurvey version is the one the role pins
       ansible.builtin.assert:
         that: limesurvey_running_version.stdout | trim == limesurvey_role_defaults.limesurvey_version | string
