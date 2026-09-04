@@ -156,13 +156,11 @@
       register: limesurvey_running_version
       changed_when: false
 
-    - name: Assert the running LimeSurvey version is the one the role pins
+    - name: Assert the running LimeSurvey is the version this role installs
       ansible.builtin.assert:
-        that: limesurvey_running_version.stdout | trim == limesurvey_role_defaults.limesurvey_version | string
-        fail_msg: >-
-          LimeSurvey reports version {{ limesurvey_running_version.stdout | trim }},
-          but defaults/main.yml pins {{ limesurvey_role_defaults.limesurvey_version }}
-        success_msg: "LimeSurvey is running {{ limesurvey_running_version.stdout | trim }}, as pinned by the role"
+        that: limesurvey_running_version.stdout | trim == limesurvey_defaults.limesurvey_version | string
+        fail_msg: "LimeSurvey reports {{ limesurvey_running_version.stdout | trim }}, expected {{ limesurvey_defaults.limesurvey_version }}"
+        success_msg: "LimeSurvey reports {{ limesurvey_running_version.stdout | trim }}"
 
     - name: Read the environment file the role rendered
       ansible.builtin.slurp:
