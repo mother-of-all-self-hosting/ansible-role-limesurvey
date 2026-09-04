@@ -86,13 +86,13 @@
         "$login_url"
 
   tasks:
-    # Namespaced, because `include_vars` outranks the scenario's group_vars and
-    # would otherwise replace the values this scenario deliberately tuned.
-    # Only `limesurvey_version` is read from it, and that is a leaf literal.
-    - name: Read the role's own defaults
+    # The role is not included in this playbook, so its defaults are not in
+    # scope. Reading defaults/main.yml directly ties the version assertion
+    # below.
+    - name: Load the role defaults
       ansible.builtin.include_vars:
         file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
-        name: limesurvey_role_defaults
+        name: limesurvey_defaults
 
     - name: Wait for the LimeSurvey service to become active (up to 180s)
       ansible.builtin.systemd:
