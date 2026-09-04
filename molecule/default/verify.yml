@@ -334,11 +334,11 @@
           and `{{ limesurvey_last_login_after.stdout | trim }}` after it)
         success_msg: "LimeSurvey recorded the administrator's login in MariaDB at {{ limesurvey_last_login_after.stdout | trim }}"
 
-    - name: Show a summary
+    - name: Show the LimeSurvey verification summary
       ansible.builtin.debug:
         msg:
-          - "systemd: {{ limesurvey_service.status.ActiveState }}"
-          - "HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
-          - "version: {{ limesurvey_running_version.stdout | trim }}"
-          - "MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
-          - "administrator last login: {{ limesurvey_last_login_after.stdout | trim }}"
+          - "LimeSurvey systemd: {{ limesurvey_service.status.ActiveState }}"
+          - "LimeSurvey version: {{ limesurvey_running_version.stdout | trim }}"
+          - "LimeSurvey HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
+          - "LimeSurvey MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
+          - "LimeSurvey administrator last login: {{ limesurvey_last_login_after.stdout | trim }}"
