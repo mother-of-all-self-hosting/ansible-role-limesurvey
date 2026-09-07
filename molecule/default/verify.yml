@@ -144,7 +144,7 @@
         fail_msg: "/index.php/admin redirected to {{ limesurvey_admin_endpoint.location | default('nowhere') }}"
         success_msg: "/index.php/admin redirected to the administrator login page"
 
-    - name: Retrieve the LimeSurvey version that is actually running
+    - name: Query the version of the running LimeSurvey
       ansible.builtin.command:
         argv:
           - docker
