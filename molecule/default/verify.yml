@@ -157,14 +157,14 @@
           - php
           - -r
           - '$c = require "/var/www/html/application/config/version.php"; echo $c["versionnumber"];'
-      register: limesurvey_running_version
+      register: limesurvey_version_reported
       changed_when: false
 
     - name: Assert the running LimeSurvey is the version this role installs
       ansible.builtin.assert:
-        that: limesurvey_running_version.stdout | trim == limesurvey_defaults.limesurvey_version | string
-        fail_msg: "LimeSurvey reports {{ limesurvey_running_version.stdout | trim }}, expected {{ limesurvey_defaults.limesurvey_version }}"
-        success_msg: "LimeSurvey reports {{ limesurvey_running_version.stdout | trim }}"
+        that: limesurvey_version_reported.stdout | trim == limesurvey_defaults.limesurvey_version | string
+        fail_msg: "LimeSurvey reports {{ limesurvey_version_reported.stdout | trim }}, expected {{ limesurvey_defaults.limesurvey_version }}"
+        success_msg: "LimeSurvey reports {{ limesurvey_version_reported.stdout | trim }}"
 
     - name: Read the environment file the role rendered
       ansible.builtin.slurp:
@@ -342,7 +342,7 @@
       ansible.builtin.debug:
         msg:
           - "LimeSurvey systemd: {{ limesurvey_service.status.ActiveState }}"
-          - "LimeSurvey version: {{ limesurvey_running_version.stdout | trim }}"
+          - "LimeSurvey version: {{ limesurvey_version_reported.stdout | trim }}"
           - "LimeSurvey HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
           - "LimeSurvey MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
           - "LimeSurvey administrator last login: {{ limesurvey_last_login_after.stdout | trim }}"
