@@ -117,7 +117,7 @@
     - name: Retrieve the LimeSurvey systemd service log for debugging
       when: limesurvey_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu limesurvey.service
+        cmd: journalctl --no-pager --output=cat --unit=limesurvey.service
       changed_when: false
 
     # 500 is what an installed-but-not-provisioned LimeSurvey answers, and it is
