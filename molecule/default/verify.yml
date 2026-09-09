@@ -86,6 +86,8 @@
         "$login_url"
 
   tasks:
+    - name: Verify that LimeSurvey works
+      block:
     # The role is not included in this playbook, so its defaults are not in
     # scope. Reading defaults/main.yml directly ties the version assertion
     # below.
@@ -346,3 +348,19 @@
           - "LimeSurvey HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
           - "LimeSurvey MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
           - "LimeSurvey administrator last login: {{ limesurvey_last_login_after.stdout | trim }}"
+
+      rescue:
+        # Whatever went wrong, the reason is almost always in the systemd service log.
+        - name: Retrieve the LimeSurvey systemd service log
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=limesurvey.service
+          register: limesurvey_service_log
+          changed_when: false
+
+        - name: Show the LimeSurvey systemd service log
+          ansible.builtin.debug:
+            var: limesurvey_service_log.stdout_lines
+
+        - name: Fail because verification did not pass
+          ansible.builtin.fail:
+            msg: "LimeSurvey verification failed. The systemd service log is printed above."
