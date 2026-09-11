@@ -85,6 +85,10 @@
         --data login_submit=login \
         "$login_url"
 
+    limesurvey_verify_units:
+      - limesurvey.service
+      - mariadb.service
+
   tasks:
     - name: Verify that LimeSurvey works
       block:
@@ -96,13 +100,14 @@
             file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
             name: limesurvey_defaults
 
-        - name: Wait for the LimeSurvey systemd service to become active (up to 180s)
+        - name: Wait for the LimeSurvey systemd services to become active (up to 180s each)
           ansible.builtin.systemd_service:
-            name: limesurvey.service
-          register: limesurvey_service
-          until: limesurvey_service.status.ActiveState == 'active'
+            name: "{{ item }}"
+          register: limesurvey_services
+          until: limesurvey_services.status.ActiveState == 'active'
           retries: 36
           delay: 5
+          loop: "{{ limesurvey_verify_units }}"
           # So that giving up is reported by the assertion below rather than as a
           # wall of systemd unit properties.
           failed_when: false
@@ -110,17 +115,20 @@
         # `Restart=always` in the systemd unit means that even a container which crashes
         # and gets restarted reads as active here, so this is a precondition rather than
         # a result.
-        - name: Assert the LimeSurvey systemd service is active
+        - name: Assert the LimeSurvey systemd services are active
           ansible.builtin.assert:
-            that: limesurvey_service.status.ActiveState == 'active'
-            fail_msg: "limesurvey.service is not active ({{ limesurvey_service.status.ActiveState }})"
-            success_msg: "limesurvey.service is active"
+            that: limesurvey_services.results | map(attribute='status.ActiveState') | unique | list == ['active']
+            fail_msg: >-
+              Not every service is active:
+              {{ dict(limesurvey_verify_units | zip(limesurvey_services.results | map(attribute='status.ActiveState'))) }}
+            success_msg: "Every systemd service is active"
 
-        - name: Retrieve the LimeSurvey systemd service log for debugging
+        - name: Retrieve the LimeSurvey systemd services log for debugging
           when: limesurvey_debug_service_enabled | bool
           ansible.builtin.command:
-            cmd: journalctl --no-pager --output=cat --unit=limesurvey.service
+            cmd: "journalctl --no-pager --output=cat --unit={{ item }}"
           changed_when: false
+          loop: "{{ limesurvey_verify_units }}"
 
         # 500 is what an installed-but-not-provisioned LimeSurvey answers, and it is
         # tolerated here only so that the retry loop can keep waiting through the
@@ -343,7 +351,7 @@
         - name: Show the LimeSurvey verification summary
           ansible.builtin.debug:
             msg:
-              - "LimeSurvey systemd: {{ limesurvey_service.status.ActiveState }}"
+              - "LimeSurvey systemd: {% for unit, state in limesurvey_verify_units | zip(limesurvey_services.results | map(attribute='status.ActiveState')) %}{{ unit }} ({{ state }}){% if not loop.last %}, {% endif %}{% endfor %}"
               - "LimeSurvey version: {{ limesurvey_version_reported.stdout | trim }}"
               - "LimeSurvey HTTP /index.php/admin: {{ limesurvey_admin_endpoint.status }} -> {{ limesurvey_admin_endpoint.location | default('') }}"
               - "LimeSurvey MariaDB tables: {{ limesurvey_table_counts.stdout.split() | first }} under `{{ limesurvey_database_table_prefix }}`"
