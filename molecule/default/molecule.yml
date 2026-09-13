@@ -31,6 +31,7 @@ provisioner:
       all:
         # Helper variables
         limesurvey_debug_service_enabled: false
+        limesurvey_restarts_check_enabled: true
 
         # Spelled out (all of these match the respective role's default) so
         # that the verification playbook, which does not include the roles and
