@@ -108,7 +108,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `limesurvey_environment_variables_additional_variables` variable
 
-See [the official documentation](https://hub.docker.com/r/acspri/limesurvey#how-to-use-this-image) for a complete list of LimeSurvey's config options that you could put in `limesurvey_environment_variables_additional_variables`.
+See [the official documentation](https://hub.docker.com/r/acspri/limesurvey#how-to-use-this-image) for a complete list of LimeSurvey's config options that you can put in `limesurvey_environment_variables_additional_variables`.
 
 ## Installing
 
