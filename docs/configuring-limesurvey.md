@@ -25,7 +25,7 @@ LimeSurvey is a feature-rich free software for web based forms and surveys, whic
 See the project's [documentation](https://www.limesurvey.org/manual/LimeSurvey_Manual) to learn what LimeSurvey does and why it might be useful to you.
 
 >[!NOTE]
-> Since the developer team behind LimeSurvey [declared](https://bugs.limesurvey.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/limesurvey), which is a LimeSurvey Authorised Partner for Australia (see [this list](https://www.limesurvey.com/index.php/hosting) of partners for confirmation).
+> Since the developer team behind LimeSurvey [declared](https://bugs.limesurvey.org/view.php?id=14606#c55854) that an official Docker image would not be available, this role uses the image provided by [ACSPRI](https://www.acspri.org.au/limesurvey), which is a LimeSurvey Authorised Partner for Australia (refer to [this list](https://www.limesurvey.com/index.php/hosting) of partners for confirmation).
 
 ## Prerequisites
 
@@ -108,7 +108,7 @@ Take a look at:
 
 - [`defaults/main.yml`](../defaults/main.yml) for some variables that you can customize via your `vars.yml` file. You can override settings (even those that don't have dedicated playbook variables) using the `limesurvey_environment_variables_additional_variables` variable
 
-See [the official documentation](https://hub.docker.com/r/acspri/limesurvey#how-to-use-this-image) for a complete list of LimeSurvey's config options that you can put in `limesurvey_environment_variables_additional_variables`.
+Refer to [the official documentation](https://hub.docker.com/r/acspri/limesurvey#how-to-use-this-image) for a complete list of LimeSurvey's config options that you can put in `limesurvey_environment_variables_additional_variables`.
 
 ## Installing
 
