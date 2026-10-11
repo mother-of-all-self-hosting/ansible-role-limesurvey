@@ -95,8 +95,6 @@ limesurvey_environment_variables_admin_name: LIMESURVEY_ADMIN_NAME_HERE
 limesurvey_environment_variables_admin_email: LIMESURVEY_ADMIN_EMAIL_ADDRESS_HERE
 ```
 
-Both `limesurvey_environment_variables_admin_user` and `limesurvey_environment_variables_admin_password` are required: the role refuses to run without them, and LimeSurvey does not install its database schema unless both are set.
-
 Generating a strong password (e.g. `pwgen -s 64 1`) is recommended for `limesurvey_environment_variables_admin_email`.
 
 >[!NOTE]
