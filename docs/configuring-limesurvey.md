@@ -97,6 +97,8 @@ limesurvey_environment_variables_admin_email: LIMESURVEY_ADMIN_EMAIL_ADDRESS_HER
 
 Both `limesurvey_environment_variables_admin_user` and `limesurvey_environment_variables_admin_password` are required: the role refuses to run without them, and LimeSurvey does not install its database schema unless both are set.
 
+Generating a strong password (e.g. `pwgen -s 64 1`) is recommended for `limesurvey_environment_variables_admin_email`.
+
 >[!NOTE]
 > The container image re-applies the administrator password on **every** start of the service, not only on the first one. If you change that account's password from within LimeSurvey's own interface, the next restart (including the one that a version bump performs) silently sets it back to whatever `limesurvey_environment_variables_admin_password` says. Change the password here rather than there, or create a separate administrator account in LimeSurvey for day-to-day use.
 
