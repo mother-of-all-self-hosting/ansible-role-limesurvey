@@ -71,8 +71,8 @@ provisioner:
         # Variables required for LimeSurvey to connect to the MariaDB database
         limesurvey_database_hostname: "{{ mariadb_connection_hostname }}"
         limesurvey_database_port: "{{ mariadb_connection_port }}"
-        limesurvey_database_username: my_database_username
-        limesurvey_database_password: my_database_password
+        limesurvey_database_username: /#@my_database_username?%
+        limesurvey_database_password: /#@my_database_password?%
         limesurvey_database_name: limesurvey
 
         # The image leaves the table prefix empty when `LIMESURVEY_TABLE_PREFIX`
