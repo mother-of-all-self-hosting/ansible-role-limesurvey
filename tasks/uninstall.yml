@@ -78,6 +78,7 @@
               {{ limesurvey_container_network }}
           register: limesurvey_network_deletion_result
           changed_when: limesurvey_container_network in limesurvey_network_deletion_result.stdout
+          failed_when: limesurvey_network_deletion_result.rc != 0 and 'not found' not in limesurvey_network_deletion_result.stderr
 
 - name: Check existence of LimeSurvey local path for configuration files
   ansible.builtin.stat:
